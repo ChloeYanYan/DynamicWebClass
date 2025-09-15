@@ -1,0 +1,15 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Acme&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&family=Open+Sans:wght@400;700&display=swap');
+
+body{
+    font-family: 'Open Sans', sans-serif;
+}
+
+:root{
+    --c-blue:#48b2ff;
+    --ff-acme:'Acme',sans-serif;
+}
+
+h1,h2,h3{
+    color:var(--c-blue);
+}
