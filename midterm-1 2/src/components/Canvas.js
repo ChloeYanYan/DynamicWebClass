@@ -10,17 +10,17 @@ export default function Canvas({
   const canvasRef = useRef(null);
   const stateRef = useRef({ draggingKey: null, offsetX: 0, offsetY: 0 });
 
-  // render
+  // 渲染
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
-    // background
+    // 背景
     ctx.clearRect(0, 0, width, height);
     ctx.fillStyle = data.bgColor || "#fff";
     ctx.fillRect(0, 0, width, height);
 
-    // image
+    // 图片
     if (data.picture?.src) {
       const img = new Image();
       img.src = data.picture.src;
@@ -32,6 +32,7 @@ export default function Canvas({
     }
 
     function drawAll(ctx, img) {
+      // 先画图片
       if (img) {
         const w = img.width * (data.picture.scale ?? 1);
         const h = img.height * (data.picture.scale ?? 1);
@@ -40,6 +41,7 @@ export default function Canvas({
         ctx.drawImage(img, x, y, w, h);
       }
 
+      // 文本统一绘制
       const drawLineText = (text, x, y, font, color, align = "center") => {
         if (!text) return;
         ctx.font = font;
@@ -66,6 +68,7 @@ export default function Canvas({
         lines.forEach((line, i) => ctx.fillText(line, x, y + i * lineHeight));
       };
 
+      // 取位姿
       const el = data.elements || {};
       drawLineText(
         data.title,
@@ -98,6 +101,7 @@ export default function Canvas({
         data.authorColor || "#777"
       );
 
+      // 导出 base64
       onRender?.(canvas.toDataURL("image/png"));
     }
   }, [
@@ -117,7 +121,7 @@ export default function Canvas({
     height,
   ]);
 
-  // drag
+  // 拖拽 & 滚轮缩放
   useEffect(() => {
     const canvas = canvasRef.current;
 
@@ -127,6 +131,7 @@ export default function Canvas({
     };
 
     const hitTest = (pt) => {
+      // 依次检测文本（以文本包围盒）与图片
       const el = data.elements || {};
       const tests = [
         [
@@ -170,7 +175,7 @@ export default function Canvas({
         }
       }
 
-      // body text
+      // body（多行）
       if (data.body) {
         const bx = el.body?.x ?? 200;
         const by = el.body?.y ?? 350;
@@ -192,9 +197,9 @@ export default function Canvas({
         }
       }
 
-      // image
+      // 图片
       if (data.picture?.src) {
-        const imgW = 100 * (data.picture.scale ?? 1);
+        const imgW = 100 * (data.picture.scale ?? 1); // 用大致区域做命中（更快）
         const imgH = 100 * (data.picture.scale ?? 1);
         const cx = data.picture.x ?? width / 2;
         const cy = data.picture.y ?? height / 2;

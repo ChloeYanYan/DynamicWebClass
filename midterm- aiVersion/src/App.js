@@ -3,14 +3,14 @@ import io from "socket.io-client";
 import Editor from "./components/Editor";
 import Community from "./components/Community";
 
-// connect to server
-const socket = io("http://localhost:4000", { transports: ["websocket"] });
+const socket = io("http://localhost:4000", { transports: ["websocket"] }); //connect backend
 
 const App = () => {
-  const [posters, setPosters] = useState([]); // community
-  const [editing, setEditing] = useState(null); // edit poster
+  const [poster, setPosters] = useState([]); //show posters in communiy
+  const [editing, setEditing] = useState(null);
   const [userId, setUserId] = useState(null);
 
+  //gengerate ID, cache function genId()
   const genId = useMemo(
     () => () =>
       `p_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
@@ -22,59 +22,41 @@ const App = () => {
     socket.on("initPosters", (list) => setPosters(list || []));
     socket.on("communityPosters", (list) => setPosters(list || []));
 
-    // add
+    //add poster
     socket.on("newPoster", (p) => setPosters((prev) => [...prev, p]));
     socket.on("posterCreated", (p) => setPosters((prev) => [...prev, p]));
-
-    // update
+    //update poster
     socket.on("posterUpdated", (p) =>
       setPosters((prev) => prev.map((x) => (x.id === p.id ? p : x)))
     );
-
-    // delete
+    //delete
     socket.on("posterDeleted", ({ id }) =>
       setPosters((prev) => prev.filter((x) => x.id !== id))
     );
 
+    //close
     return () => {
       socket.off("welcome");
-      socket.off("initPosters");
-      socket.off("communityPosters");
-      socket.off("newPoster");
-      socket.off("posterCreated");
-      socket.off("posterUpdated");
-      socket.off("posterDeleted");
+      socket.off("");
     };
   }, []);
 
-  // publish
-  const handleCreate = (draft) => {
+  //create, publish
+  const handleUpdate = (draft) => {
     const poster = { ...draft, id: genId(), userId: userId ?? "local" };
-
     socket.emit("publishPoster", {
       userId: poster.userId,
       image: poster.image,
       link: poster.link ?? "#",
     });
     socket.emit("createPoster", poster);
-
     setEditing(null);
   };
 
-  //update
-  const handleUpdate = (patch) => {
-    if (!patch?.id) return;
-    setPosters((prev) =>
-      prev.map((p) => (p.id === patch.id ? { ...p, ...patch } : p))
-    );
-    socket.emit("updatePoster", patch);
-    setEditing(null);
-  };
-
-  // 删除
   const handleDelete = (id) => {
     setPosters((prev) => prev.filter((p) => p.id !== id));
     socket.emit("deletePoster", { id });
+
     if (editing?.id === id) setEditing(null);
   };
 
@@ -83,9 +65,9 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <header className="text-center py-6">
-        <h1 className="text-3xl font-bold">Poster Generator</h1>
-      </header>
+      <head className="text-center py-6">
+        <h1 className="text-3xl font-bond">Poster Generator</h1>
+      </head>
 
       <main className="max-w-6xl mx-auto px-4">
         <Editor
@@ -98,7 +80,7 @@ const App = () => {
         />
 
         <Community
-          posters={posters}
+          poster={posters}
           onEdit={handleEditStart}
           onDelete={handleDelete}
         />

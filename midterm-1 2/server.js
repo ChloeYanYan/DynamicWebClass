@@ -16,7 +16,7 @@ io.on("connection", (socket) => {
   socket.emit("welcome", { userId: socket.id });
   socket.emit("initPosters", posters);
 
-  // get new poster
+  // 接收新海报
   socket.on("newPoster", (poster) => {
     posters.push(poster);
     io.emit("newPoster", poster);
